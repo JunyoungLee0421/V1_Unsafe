@@ -129,7 +129,7 @@ app.post('/signup', async (req, res) => {
 
     if (success) {
         var results = await db_users.getUsers();
-        res.redirect('/loggedin/members');
+        res.redirect('/members');
         return;
         // res.render("members", { users: results });
     }
@@ -153,6 +153,7 @@ app.post('/login', async (req, res) => {
 
     var results = await db_users.getUser({ user: username, hashedPassword: password });
 
+    console.log(results)
     if (results) {
         if (results.length == 1) { //there should only be 1 user in the db that matches
             if (bcrypt.compareSync(password, results[0].password)) {
@@ -160,7 +161,7 @@ app.post('/login', async (req, res) => {
                 req.session.username = username;
                 req.session.cookie.maxAge = expireTime;
 
-                res.redirect('/loggedin/members');
+                res.redirect('/members');
                 return;
             }
             else {
@@ -238,7 +239,25 @@ app.get('/loggedin/admin', (req, res) => {
 });
 
 app.get('/loggedin/members', (req, res) => {
-    res.render("members", { username: req.session.username, user_type: req.session.user_type });
+    randomCat = Math.floor(Math.random() * 3) + 1;
+    res.render("members", {
+        username: req.session.username,
+        user_type: req.session.user_type,
+        cat_photo: `cat${randomCat}`
+    });
+});
+
+app.get('/members', (req, res) => {
+    if (req.session.authenticated) {
+        randomCat = Math.floor(Math.random() * 3) + 1;
+        res.render("members", {
+            username: req.session.username,
+            user_type: req.session.user_type,
+            cat_photo: `cat${randomCat}`
+        });
+    } else {
+        res.redirect("/");
+    }
 });
 
 
